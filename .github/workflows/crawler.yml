@@ -93,7 +93,6 @@ jobs:
             fi
           fi
 
-
       # --------------------------------------------------------------------------------
       # 🚦 TRAFFIC CONTROL / 流量控制
       # --------------------------------------------------------------------------------
@@ -102,6 +101,7 @@ jobs:
       #
       # CN: 生成 1 到 300 秒（5分钟）之间的随机延迟。
       #     这对负载均衡至关重要。
+      #
       # - name: Random Delay (Traffic Control)
       #   if: success()
       #   run: |
@@ -168,3 +168,32 @@ jobs:
           S3_REGION: ${{ secrets.S3_REGION }}
           GITHUB_ACTIONS: true
         run: uv run python -m trendradar
+
+      - name: List generated files
+        if: always()
+        run: |
+          echo "Current directory:"
+          pwd
+          echo ""
+          echo "Top-level files:"
+          ls -la
+          echo ""
+          echo "Generated files preview:"
+          find . -maxdepth 4 -type f | sort | head -300
+
+      - name: Upload output artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trendradar-output
+          path: |
+            output/
+            data/
+            reports/
+            *.html
+            *.txt
+            *.md
+            *.sqlite
+            *.db
+          if-no-files-found: warn
+          retention-days: 7
